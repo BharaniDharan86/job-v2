@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import catchAsyncError from "../utils/catchAsyncErr.js";
 import AppError from "../utils/appError.js";
 import { generateOtp } from "../utils/generators.js";
+import { sendEmail } from "../utils/email.js";
 
 export const signUp = catchAsyncError(async (req, res, next) => {
   const { userName, password, email, gender } = req.body;
@@ -25,11 +26,15 @@ export const signUp = catchAsyncError(async (req, res, next) => {
   });
 
   // if user registered but hasn't verified his account yet
-
   if (isUserNotVerified) {
     const otp = generateOtp();
 
-    //sending mail to the user
+    await sendEmail({
+      to: email,
+      userName,
+      otp,
+      subject: "User Registration",
+    });
 
     await User.findByIdAndUpdate(isUserNotVerified._id, {
       otp: otp,
@@ -44,11 +49,15 @@ export const signUp = catchAsyncError(async (req, res, next) => {
   const isUserNotExists = await User.findOne({ email });
 
   //when user first time logs in to the application
-
   if (!isUserNotExists) {
     const otp = generateOtp();
 
-    //sent the mail to the user
+    await sendEmail({
+      to: email,
+      userName,
+      otp,
+      subject: "User Registration",
+    });
 
     const newUser = await User.create({
       userName,
