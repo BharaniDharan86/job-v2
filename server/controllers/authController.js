@@ -77,3 +77,25 @@ export const signUp = catchAsyncError(async (req, res, next) => {
     });
   }
 });
+
+export const verifyEmail = catchAsyncError(async (req, res, next) => {
+  const { otp: userOtp, email } = req.body;
+
+  const currentUser = await User.findOne({ email });
+
+  const isValidOtp = currentUser.otp === userOtp;
+
+  if (!isValidOtp)
+    return next(new AppError("Entered Otp is Incorrect", 400, "Failed"));
+
+  await User.findByIdAndUpdate(currentUser._id, {
+    isActive: true,
+    isVerified: true,
+  });
+
+  return res.status(200).json({
+    status: "success",
+    success: true,
+    message: "User created successfully !!!",
+  });
+});
