@@ -104,3 +104,30 @@ export const verifyEmail = catchAsyncError(async (req, res, next) => {
     message: "User created successfully !!!",
   });
 });
+
+export const login = catchAsyncError(async (req, res, next) => {
+  const { email, password: userPassword } = req.body;
+
+  const currentUser = await User.findOne({ email });
+
+  if (!currentUser)
+    return next(new AppError("Provided email or password doesn't exists", 404));
+
+  const isValidPassword = await currentUser.comparePassword(
+    userPassword,
+    currentUser.password
+  );
+
+  if (!isValidPassword)
+    return next(new AppError("Provided email or password doesn't exists", 400));
+
+  const token = createJWT(currentUser._id);
+
+  res.cookie("access_token", token);
+
+  return res.status(200).json({
+    status: "success",
+    success: true,
+    message: "Logged in successfully !!!",
+  });
+});
