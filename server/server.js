@@ -6,8 +6,6 @@ import mongoose from "mongoose";
 const PORT = process.env.PORT;
 const MONGO_DB_URI = process.env.MONGODB_URI;
 
-console.log(process.env.NODE_ENV, "server");
-
 mongoose
   .connect(MONGO_DB_URI)
   .then((con) => {
