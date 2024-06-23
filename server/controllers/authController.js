@@ -3,6 +3,7 @@ import catchAsyncError from "../utils/catchAsyncErr.js";
 import AppError from "../utils/appError.js";
 import { generateOtp } from "../utils/generators.js";
 import { sendEmail } from "../utils/email.js";
+import { createJWT } from "../utils/jwt.js";
 
 export const signUp = catchAsyncError(async (req, res, next) => {
   const { userName, password, email, gender } = req.body;
@@ -87,6 +88,10 @@ export const verifyEmail = catchAsyncError(async (req, res, next) => {
 
   if (!isValidOtp)
     return next(new AppError("Entered Otp is Incorrect", 400, "Failed"));
+
+  const token = createJWT(currentUser._id);
+
+  res.cookie("access_token", token);
 
   await User.findByIdAndUpdate(currentUser._id, {
     isActive: true,
