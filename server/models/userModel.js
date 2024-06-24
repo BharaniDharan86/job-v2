@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcryptjs";
+import Education from "./educationModel.js";
+import Experience from "./experienceModel.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -47,9 +49,35 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    skills: {
+      type: Array,
+    },
+    education: {
+      type: [Education.schema],
+    },
+    experiences: {
+      type: [Experience.schema],
+    },
+    bookMarks: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Job",
+    },
+    appliedJobs: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Job",
+    },
+    role: {
+      type: String,
+      default: "job seeker",
+    },
+    location: {
+      type: String,
+    },
   },
   {
     timestamps: true,
+    toObject: true,
+    toJSON: true,
   }
 );
 
