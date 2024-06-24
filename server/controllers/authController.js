@@ -4,6 +4,8 @@ import AppError from "../utils/appError.js";
 import { generateOtp } from "../utils/generators.js";
 import { sendEmail } from "../utils/email.js";
 import { createJWT } from "../utils/jwt.js";
+import { promisify } from "util";
+import jwt from "jsonwebtoken";
 
 export const signUp = catchAsyncError(async (req, res, next) => {
   const { userName, password, email, gender } = req.body;
@@ -130,4 +132,32 @@ export const login = catchAsyncError(async (req, res, next) => {
     success: true,
     message: "Logged in successfully !!!",
   });
+});
+
+export const protect = catchAsyncError(async (req, res, next) => {
+  // check for the token
+
+  let token = undefined;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) return next(new AppError("You're not logged in", 400, "Failed"));
+
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  const user = await User.findById(decoded.id);
+
+  if (!user)
+    return next(
+      new AppError(400, "Invalid token please login again", "failed")
+    );
+
+  req.user = user;
+
+  next();
 });
